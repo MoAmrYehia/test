@@ -1,8 +1,16 @@
 import torch
 import torchvision
+print("PyTorch version:", torch.__version__)
+print("Torchvision version:", torchvision.__version__)
+print("CUDA is available:", torch.cuda.is_available())
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, Response
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
+
+import json
 
 import matplotlib.pyplot as plt
 import cv2
@@ -19,7 +27,7 @@ sys.path.append("..")
 
 sam_checkpoint = "sam_vit_h_4b8939.pth"
 model_type = "vit_h"
-device = "cpu"
+device = "cuda"
 
 sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
 sam.to(device=device)
@@ -46,9 +54,17 @@ def upload():
 
     # Encode the image as base64
     image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-
+    
+    data = {'code': 200,
+            'message': "The material was detected sucessfully",
+            'image': image_base64}
+                    
+    r = Response(response= json.dumps(data), status=200, mimetype="application/json")
+    r.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    r.headers["Access-Control-Allow-Origin"] = "*"
+    r.headers["Access-Control-Allow-Methods"] = "OPTIONS,POST,GET"
     # Print the base64 encoded image
-    return jsonify({'image_base64': image_base64})
+    return r
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=8080)
