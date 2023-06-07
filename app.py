@@ -65,6 +65,7 @@ def upload():
 
     pixels = random_tuple(image.shape[0], image.shape[1])
     print(f"Number of pixels = {len(pixels)}")
+    plt.figure(figsize=(image.shape[0],image.shape[1]))
     plt.imshow(image)
     show_anns(masks)
     for i in range(len(pixels)):
